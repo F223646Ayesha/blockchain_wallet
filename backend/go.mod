@@ -1,6 +1,6 @@
 module crypto-wallet
 
-go 1.25.4
+go 1.22
 
 require (
 	cloud.google.com/go/firestore v1.20.0
