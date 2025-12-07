@@ -2,6 +2,8 @@ package main
 
 import (
 	"log"
+	"os"
+	"time"
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
@@ -14,26 +16,30 @@ import (
 
 func main() {
 
-	// Load .env file
-	if err := godotenv.Load(); err != nil {
-		log.Println("⚠️ Warning: .env file not found")
-	}
+	// Load .env only for local development
+	_ = godotenv.Load()
 
-	// Init Firestore connection
+	// Initialize Firestore connection
 	config.InitFirestore()
 
-	// ----------------------------------------
-	// 🔥 START MONTHLY ZAKAT SCHEDULER
-	// ----------------------------------------
+	// Start monthly Zakat scheduler
 	services.InitScheduler()
 	log.Println("⏰ Monthly Zakat Scheduler initialized")
 
-	// Create Gin server
+	// Create Gin router
 	r := gin.Default()
 
-	// === CORS FIX ===
+	// ======================================================
+	// ✅ CORS CONFIG — ALLOW LOCAL + RENDER FRONTEND
+	// ======================================================
+	frontendURL := os.Getenv("FRONTEND_URL") // Set this in Render
+	if frontendURL == "" {
+		frontendURL = "http://localhost:5173" // fallback for local dev
+	}
+
 	r.Use(cors.New(cors.Config{
 		AllowOrigins: []string{
+			frontendURL,
 			"http://localhost:5173",
 			"http://localhost:5174",
 			"http://127.0.0.1:5173",
@@ -43,12 +49,24 @@ func main() {
 		AllowHeaders:     []string{"Origin", "Content-Type", "Authorization"},
 		ExposeHeaders:    []string{"Content-Length"},
 		AllowCredentials: true,
+		MaxAge:           12 * time.Hour,
 	}))
 
 	// Register all API routes
 	routes.RegisterRoutes(r)
 
-	// Start backend server
-	log.Println("🚀 Server running on http://localhost:8080")
-	r.Run(":8080")
+	// ======================================================
+	// ✅ PORT FIX — Required for Render Deployment
+	// ======================================================
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "8080" // local fallback
+	}
+
+	log.Println("🚀 Server running on port:", port)
+
+	// Start server
+	if err := r.Run(":" + port); err != nil {
+		log.Fatal("❌ Failed to start server: ", err)
+	}
 }
