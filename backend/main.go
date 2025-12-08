@@ -3,7 +3,6 @@ package main
 import (
 	"log"
 	"os"
-	"time"
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
@@ -15,58 +14,44 @@ import (
 )
 
 func main() {
+	// Load .env locally (Render will use env vars instead)
+	if err := godotenv.Load(); err != nil {
+		log.Println("⚠️ Warning: .env file not found")
+	}
 
-	// Load .env only for local development
-	_ = godotenv.Load()
-
-	// Initialize Firestore connection
+	// Init Firestore + scheduler
 	config.InitFirestore()
-
-	// Start monthly Zakat scheduler
 	services.InitScheduler()
 	log.Println("⏰ Monthly Zakat Scheduler initialized")
 
-	// Create Gin router
 	r := gin.Default()
 
-	// ======================================================
-	// ✅ CORS CONFIG — ALLOW LOCAL + RENDER FRONTEND
-	// ======================================================
-	frontendURL := os.Getenv("FRONTEND_URL") // Set this in Render
-	if frontendURL == "" {
-		frontendURL = "http://localhost:5173" // fallback for local dev
-	}
+	// 🔹 Simple health check route
+	r.GET("/health", func(c *gin.Context) {
+		c.JSON(200, gin.H{"status": "ok"})
+	})
 
+	// CORS
 	r.Use(cors.New(cors.Config{
 		AllowOrigins: []string{
-			frontendURL,
 			"http://localhost:5173",
-			"http://localhost:5174",
 			"http://127.0.0.1:5173",
-			"http://127.0.0.1:5174",
+			// you can add your Render frontend URL here later
 		},
 		AllowMethods:     []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
 		AllowHeaders:     []string{"Origin", "Content-Type", "Authorization"},
 		ExposeHeaders:    []string{"Content-Length"},
 		AllowCredentials: true,
-		MaxAge:           12 * time.Hour,
 	}))
 
-	// Register all API routes
+	// API routes under /api
 	routes.RegisterRoutes(r)
 
-	// ======================================================
-	// ✅ PORT FIX — Required for Render Deployment
-	// ======================================================
+	// Use PORT from env (Render sets this)
 	port := os.Getenv("PORT")
 	if port == "" {
-		port = "8080" // local fallback
+		port = "10000"
 	}
-
 	log.Println("🚀 Server running on port:", port)
-
-	// Start server
-	if err := r.Run(":" + port); err != nil {
-		log.Fatal("❌ Failed to start server: ", err)
-	}
+	r.Run(":" + port)
 }
