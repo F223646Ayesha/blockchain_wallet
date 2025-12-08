@@ -21,38 +21,44 @@ func generateOTP() string {
 }
 
 func SendOTPService(email string) error {
+	log.Println("📩 SendOTPService called with email:", email)
+
 	email = strings.TrimSpace(email)
 	if email == "" {
+		log.Println("❌ Email missing.")
 		return errors.New("email is required")
 	}
 
 	ctx := context.Background()
-
 	otp := generateOTP()
+	log.Println("🔢 Generated OTP:", otp)
 
-	// Save OTP to Firestore
+	// SAVE OTP IN FIRESTORE
+	log.Println("📝 Attempting to save OTP to Firestore...")
 	_, _, err := config.Firestore.Collection("otps").Add(ctx, map[string]interface{}{
 		"email":     email,
 		"otp":       otp,
 		"createdAt": time.Now(),
 	})
+
 	if err != nil {
+		log.Println("❌ Firestore OTP save FAILED:", err)
 		return errors.New("failed to store OTP in Firestore")
 	}
+	log.Println("✅ OTP saved to Firestore successfully")
 
+	// SEND EMAIL
 	subject := "Your Wallet Login OTP"
-	body := fmt.Sprintf(
-		"Your one-time login code is: %s\n\nThis code expires in 5 minutes.",
-		otp,
-	)
+	body := fmt.Sprintf("Your OTP is: %s\n\nThis code expires in 5 minutes.", otp)
 
-	// Send real email
+	log.Println("📨 Sending OTP email via SMTP...")
 	err = SendEmail(email, subject, body)
 	if err != nil {
+		log.Println("❌ Email send FAILED:", err)
 		return errors.New("failed to send email")
 	}
 
-	log.Println("OTP sent successfully to:", email)
+	log.Println("✅ Email sent successfully to:", email)
 	return nil
 }
 
