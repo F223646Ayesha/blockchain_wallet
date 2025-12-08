@@ -8,6 +8,17 @@ import (
 
 func RegisterRoutes(r *gin.Engine) {
 
+	// ============================
+	// HEALTH CHECK ROOT ROUTE
+	// ============================
+	r.GET("/", func(c *gin.Context) {
+		c.JSON(200, gin.H{
+			"status":   "running",
+			"service":  "blockchain_wallet_backend",
+			"message":  "Health check OK",
+		})
+	})
+
 	api := r.Group("/api")
 
 	// ============================
@@ -47,11 +58,10 @@ func RegisterRoutes(r *gin.Engine) {
 	api.GET("/logs", controllers.GetLogs)
 
 	// ============================
-	// ZAKAT
+	// ZAKAT + REPORTS
 	// ============================
 	api.POST("/zakat/run", controllers.RunZakat)
 	api.GET("/analytics/system", controllers.GetSystemAnalytics)
 	api.GET("/reports/wallet/:id", controllers.GetWalletReport)
 	api.GET("/blockchain/validate", controllers.ValidateBlockchain)
-
 }
