@@ -1,4 +1,4 @@
-const API_BASE = "http://localhost:8080/api";
+const API_BASE = "https://blockchain-wallet-backend.onrender.com/api";
 
 export async function apiGet(path) {
   const res = await fetch(API_BASE + path);
