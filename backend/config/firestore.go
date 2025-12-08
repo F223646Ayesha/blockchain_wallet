@@ -1,31 +1,17 @@
-package config
-
-import (
-	"context"
-	"log"
-	"os"
-
-	"cloud.google.com/go/firestore"
-	"google.golang.org/api/option"
-)
-
-var Firestore *firestore.Client
-
-// ⭐ Add Firebase API Key for OTP login
-var FirebaseAPIKey string
-
 func InitFirestore() {
 	ctx := context.Background()
 
 	projectID := os.Getenv("FIREBASE_PROJECT_ID")
-	credentials := os.Getenv("GOOGLE_APPLICATION_CREDENTIALS")
-	FirebaseAPIKey = os.Getenv("FIREBASE_API_KEY") // ⭐ NEW
+	FirebaseAPIKey = os.Getenv("FIREBASE_API_KEY")
 
-	if projectID == "" || credentials == "" || FirebaseAPIKey == "" {
-		log.Fatal("❌ Missing FIREBASE_PROJECT_ID / GOOGLE_APPLICATION_CREDENTIALS / FIREBASE_API_KEY")
+	// 🔥 Use fixed Render secret file path
+	credentialsPath := "/etc/secrets/serviceAccountKey.json"
+
+	if projectID == "" || FirebaseAPIKey == "" {
+		log.Fatal("❌ Missing FIREBASE_PROJECT_ID or FIREBASE_API_KEY")
 	}
 
-	client, err := firestore.NewClient(ctx, projectID, option.WithCredentialsFile(credentials))
+	client, err := firestore.NewClient(ctx, projectID, option.WithCredentialsFile(credentialsPath))
 	if err != nil {
 		log.Fatalf("❌ Firestore connection failed: %v", err)
 	}
