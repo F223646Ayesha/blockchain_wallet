@@ -29,6 +29,23 @@ func InitFirestore() {
 	// /etc/secrets/<filename>
 	// ===============================
 	credentialsPath := "/etc/secrets/serviceAccountKey.json"
+	log.Println("🔍 FIRESTORE INIT STARTING...")
+
+	log.Println("📌 FIREBASE_PROJECT_ID =", projectID)
+	log.Println("📌 FIREBASE_API_KEY =", FirebaseAPIKey)
+	log.Println("📌 GOOGLE_APPLICATION_CREDENTIALS =", credentials)
+	
+	// Check if credentials file exists
+	if credentials == "" {
+	    log.Println("❌ GOOGLE_APPLICATION_CREDENTIALS is EMPTY!")
+	} else {
+	    if _, err := os.Stat(credentials); os.IsNotExist(err) {
+	        log.Println("❌ Credentials file NOT FOUND at:", credentials)
+	    } else {
+	        log.Println("✔ Credentials file FOUND at:", credentials)
+	    }
+	}
+
 
 	// ===============================
 	// 🔥 Validate configuration
