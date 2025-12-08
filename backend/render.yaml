@@ -4,8 +4,10 @@ services:
     env: go
     region: oregon
     plan: free
+    
     buildCommand: "go build -o app"
     startCommand: "./app"
+    healthCheckPath: "/"
     envVars:
       - key: GO_VERSION
         value: 1.22
