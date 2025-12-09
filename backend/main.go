@@ -14,30 +14,22 @@ import (
 )
 
 func main() {
-	// Load .env locally (Render will use env vars instead)
-	if err := godotenv.Load(); err != nil {
-		log.Println("⚠️ Warning: .env file not found")
-	}
+	godotenv.Load()
 
-	// Init Firestore + scheduler
 	config.InitFirestore()
 	services.InitScheduler()
-	log.Println("⏰ Monthly Zakat Scheduler initialized")
 
 	r := gin.Default()
 
-	// 🔹 Simple health check route
-	r.GET("/health", func(c *gin.Context) {
-		c.JSON(200, gin.H{"status": "ok"})
-	})
-
-	// CORS
+	// -----------------------------------
+	// CORS MUST BE THE FIRST MIDDLEWARE!
+	// -----------------------------------
 	r.Use(cors.New(cors.Config{
 		AllowOrigins: []string{
 			"http://localhost:5173",
 			"http://127.0.0.1:5173",
-			"https://blockchain-wallet-z5s8.onrender.com",
 			"https://blockchain-wallet-ui.vercel.app",
+			"https://blockchain-wallet-z5s8.onrender.com",
 		},
 		AllowMethods:     []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
 		AllowHeaders:     []string{"Origin", "Content-Type", "Authorization"},
@@ -45,14 +37,17 @@ func main() {
 		AllowCredentials: true,
 	}))
 
-	// API routes under /api
+	// Health route AFTER CORS
+	r.GET("/health", func(c *gin.Context) {
+		c.JSON(200, gin.H{"status": "ok"})
+	})
+
+	// All API routes AFTER CORS
 	routes.RegisterRoutes(r)
 
-	// Use PORT from env (Render sets this)
 	port := os.Getenv("PORT")
 	if port == "" {
 		port = "10000"
 	}
-	log.Println("🚀 Server running on port:", port)
 	r.Run(":" + port)
 }
