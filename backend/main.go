@@ -18,12 +18,13 @@ func main() {
 
 	config.InitFirestore()
 	services.InitScheduler()
+	log.Println("⏰ Monthly Zakat Scheduler initialized")
 
 	r := gin.Default()
 
-	// -----------------------------------
-	// CORS MUST BE THE FIRST MIDDLEWARE!
-	// -----------------------------------
+	// ---------------------------
+	// FIX: CORS FIRST
+	// ---------------------------
 	r.Use(cors.New(cors.Config{
 		AllowOrigins: []string{
 			"http://localhost:5173",
@@ -37,17 +38,23 @@ func main() {
 		AllowCredentials: true,
 	}))
 
-	// Health route AFTER CORS
+	log.Println("🚀 CORS middleware initialized")
+
+	// Health check
 	r.GET("/health", func(c *gin.Context) {
 		c.JSON(200, gin.H{"status": "ok"})
 	})
 
-	// All API routes AFTER CORS
+	// API Routes
 	routes.RegisterRoutes(r)
 
+	// PORT
 	port := os.Getenv("PORT")
 	if port == "" {
 		port = "10000"
 	}
+
+	log.Println("🚀 Server running on port:", port)
+
 	r.Run(":" + port)
 }
