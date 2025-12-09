@@ -37,6 +37,7 @@ func main() {
 			"http://localhost:5173",
 			"http://127.0.0.1:5173",
 			"https://blockchain-wallet-z5s8.onrender.com",
+			"https://blockchain-wallet-ui.vercel.app",
 		},
 		AllowMethods:     []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
 		AllowHeaders:     []string{"Origin", "Content-Type", "Authorization"},
