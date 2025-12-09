@@ -26,17 +26,19 @@ func main() {
 	// FIX: CORS FIRST
 	// ---------------------------
 	r.Use(cors.New(cors.Config{
-		AllowOrigins: []string{
-			"http://localhost:5173",
-			"http://127.0.0.1:5173",
-			"https://blockchain-wallet-ui.vercel.app",
-			"https://blockchain-wallet-z5s8.onrender.com",
-		},
-		AllowMethods:     []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
-		AllowHeaders:     []string{"Origin", "Content-Type", "Authorization"},
-		ExposeHeaders:    []string{"Content-Length"},
-		AllowCredentials: true,
-	}))
+	AllowOrigins: []string{
+		"http://localhost:5173",
+		"http://127.0.0.1:5173",
+		"https://blockchain-wallet-ui.vercel.app",
+		"https://blockchain-wallet-b5oe4dl1q-ayenairp073-gmailcoms-projects.vercel.app",
+	},
+	AllowMethods:     []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
+	AllowHeaders:     []string{"Origin", "Content-Type", "Authorization"},
+	ExposeHeaders:    []string{"Content-Length"},
+	AllowCredentials: true,
+	AllowWildcard:    true,
+}))
+
 
 	log.Println("🚀 CORS middleware initialized")
 
